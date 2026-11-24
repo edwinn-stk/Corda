@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corda · My tickets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f1f7;--card:#fff;--ink:#16121f;--mute:#6d6880;--line:#e7e3ef;
+    --night:#110d1c;--night2:#1d1630;--violet:#6a3df0;--violet2:#efe9ff;--coral:#ff6b4a;--gold:#ffc65c;--ok:#11804a;--bad:#b42318;
+    --display:"Space Grotesk",Inter,system-ui,sans-serif
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  button{font:inherit}
+
+  /* header */
+  header{background:var(--night);color:#fff;position:sticky;top:0;z-index:30;border-bottom:1px solid #2a2240}
+  .top{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:26px;padding:12px 20px}
+  .logo{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.03em;display:flex;align-items:center;gap:9px}
+  .logo svg{display:block}
+  nav{display:flex;gap:2px}
+  nav button{border:0;background:none;padding:9px 14px;border-radius:999px;font-size:14px;color:#b9b1d3;cursor:pointer;transition:.15s}
+  nav button:hover{color:#fff}
+  nav button.on{background:#2a2142;color:#fff;font-weight:600}
+  .search{margin-left:auto;display:flex;align-items:center;gap:8px;background:#1f1830;border:1px solid #30284a;border-radius:999px;padding:8px 14px;color:#8d84a8;font-size:13px;min-width:220px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--coral),var(--violet));display:grid;place-items:center;font-weight:700;font-size:13px}
+
+  /* hero */
+  .hero{position:relative;overflow:hidden;background:var(--night);color:#fff}
+  .hero .art{position:absolute;inset:0;background:
+      radial-gradient(60% 90% at 82% 10%,rgba(255,107,74,.75) 0,rgba(255,107,74,0) 60%),
+      radial-gradient(50% 80% at 55% 120%,rgba(255,198,92,.45) 0,rgba(255,198,92,0) 60%),
+      radial-gradient(70% 100% at 10% 0%,rgba(106,61,240,.9) 0,rgba(106,61,240,0) 70%),
+      linear-gradient(180deg,#1b1330,#110d1c)}
+  .hero .rings{position:absolute;right:-80px;top:-120px;width:520px;height:520px;border-radius:50%;
+      background:repeating-radial-gradient(circle,rgba(255,255,255,.10) 0 1px,transparent 1px 22px);mask:radial-gradient(circle,#000 30%,transparent 70%);-webkit-mask:radial-gradient(circle,#000 30%,transparent 70%)}
+  .hero .grain{position:absolute;inset:0;opacity:.18;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+  .hero .in{position:relative;max-width:1120px;margin:0 auto;padding:44px 20px 92px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#ffd9cf;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:6px 12px;border-radius:999px}
+  .eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--coral);box-shadow:0 0 0 4px rgba(255,107,74,.25)}
+  .hero h1{font-family:var(--display);font-size:clamp(34px,6vw,58px);line-height:1;letter-spacing:-.035em;margin:16px 0 10px}
+  .hero h1 span{display:block;font-size:.5em;letter-spacing:-.01em;color:#ffd5c9;margin-top:8px;font-weight:600}
+  .meta{display:flex;flex-wrap:wrap;gap:10px 22px;color:#ddd6f3;font-size:14px}
+  .meta b{color:#fff;font-weight:600}
+
+  main{max-width:1120px;margin:-58px auto 0;padding:0 20px 140px;position:relative}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+  @media (max-width:900px){.layout{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 1px 2px rgba(22,18,31,.04),0 8px 24px rgba(22,18,31,.05)}
+  .panel + .panel{margin-top:20px}
+  .ph{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:16px}
+  h2{font-family:var(--display);font-size:20px;letter-spacing:-.02em;margin:0}
+  h3{font-size:14px;margin:0 0 10px}
+  .mute{color:var(--mute);font-size:13px}
+
+  /* ticket */
+  .tickets{display:grid;gap:14px}
+  .tk{display:grid;grid-template-columns:132px 1fr;border-radius:16px;overflow:hidden;background:#fff;border:1px solid var(--line);position:relative;transition:.2s}
+  .tk.gone{opacity:.72}
+  .stub{background:linear-gradient(160deg,var(--violet),#3a1c9c);color:#fff;padding:16px 14px;display:flex;flex-direction:column;justify-content:space-between;position:relative}
+  .stub:after{content:"";position:absolute;right:-1px;top:10px;bottom:10px;border-right:2px dashed rgba(255,255,255,.0)}
+  .seatgrid{display:grid;gap:8px}
+  .seatgrid div{line-height:1.1}
+  .seatgrid small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.75}
+  .seatgrid b{font-family:var(--display);font-size:22px}
+  .tk .body{padding:16px 18px 16px 22px;position:relative;border-left:2px dashed var(--line)}
+  .tk .body:before,.tk .body:after{content:"";position:absolute;left:-11px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:1px solid var(--line)}
+  .tk .body:before{top:-11px}
+  .tk .body:after{bottom:-11px}
+  .tk .row1{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .tk .title{font-weight:700;font-size:15px}
+  .chip{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;white-space:nowrap;background:#eef0f4;color:#4b5563}
+  .chip.yours{background:#e9f7ef;color:var(--ok)}
+  .chip.sent{background:#e8f0ff;color:#2550c8}
+  .chip.listed{background:#fdecea;color:var(--bad)}
+  .tk .info{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:13px;color:var(--mute)}
+  .tk .info b{color:var(--ink);font-weight:600}
+  .barcode{height:38px;margin-top:14px;border-radius:6px;background:repeating-linear-gradient(90deg,#1f1a2b 0 2px,transparent 2px 4px,#1f1a2b 4px 5px,transparent 5px 8px,#1f1a2b 8px 11px,transparent 11px 13px);opacity:.14;position:relative}
+
+  .tk .status{font-size:12.5px;margin-top:10px}
+  .tk .status.sent{color:#2550c8}
+  .tk .status.listed{color:var(--bad)}
+  @media (max-width:520px){.tk{grid-template-columns:1fr}.tk .body{border-left:0;border-top:2px dashed var(--line)}.tk .body:before,.tk .body:after{display:none}.seatgrid{grid-template-columns:repeat(3,1fr)}}
+
+  /* actions */
+  .actionbar{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 16px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;transition:.15s}
+  .btn:hover{border-color:#cfc8e0;background:#faf9fd}
+  .btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+  .btn.primary:hover{background:#2a2340}
+  .btn.accent{background:var(--violet);border-color:var(--violet);color:#fff}
+  .btn:disabled{opacity:.45;cursor:default}
+  .btn svg{width:16px;height:16px}
+  .ok{display:flex;gap:10px;align-items:flex-start;background:#ecf8f1;border:1px solid #bfe6cf;color:#14532d;border-radius:12px;padding:12px 14px;margin-top:16px;font-size:14px}
+  .form{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:18px;background:#fbfaff}
+  .form h3{font-family:var(--display);font-size:17px;letter-spacing:-.01em;margin-bottom:4px}
+  .opt{display:flex;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-top:8px;font-size:14px;cursor:pointer}
+  .opt:hover{border-color:#cfc8e0}
+  .field{margin-top:12px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--mute);margin-bottom:6px}
+  input[type=email],input[type=number]{border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:14px;width:100%;max-width:360px;background:#fff}
+  input:focus{outline:2px solid #cbbcff;outline-offset:1px;border-color:var(--violet)}
+  .note{font-size:12.5px;color:var(--mute);margin-top:10px;line-height:1.5}
+
+  /* sidebar */
+  .side .kv{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
+  .side .kv:first-of-type{border-top:0;padding-top:0}
+  .side .ic{width:34px;height:34px;flex:none;border-radius:10px;background:var(--violet2);color:var(--violet);display:grid;place-items:center}
+  .side .ic svg{width:17px;height:17px}
+  .side .kv b{display:block;font-weight:600}
+  .side .kv span{color:var(--mute);font-size:13px}
+  .map{height:120px;border-radius:12px;margin-top:14px;background:
+      linear-gradient(0deg,transparent 48%,#e2ddec 48% 52%,transparent 52%),
+      linear-gradient(90deg,transparent 30%,#e2ddec 30% 33%,transparent 33%),
+      linear-gradient(120deg,transparent 60%,#e2ddec 60% 62%,transparent 62%),#f6f4fa;position:relative;border:1px solid var(--line)}
+  .map:after{content:"";position:absolute;left:58%;top:34%;width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--coral);box-shadow:0 4px 10px rgba(255,107,74,.4)}
+  .order{display:flex;justify-content:space-between;font-size:14px;padding:6px 0}
+  .order.total{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-weight:700}
+
+  /* event + help */
+  .about p{font-size:15px;line-height:1.6;color:#3a3549;margin:0 0 10px}
+  .lineup{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+  .act{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 14px 10px 10px}
+  .act i{width:38px;height:38px;border-radius:50%;display:block}
+  .act b{display:block;font-size:14px}
+  .tinfo .kv{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-top:1px solid var(--line);font-size:14px}
+  .tinfo .kv:first-of-type{border-top:0}
+  .yes{color:var(--ok);font-weight:600;text-align:right}
+  .cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+  .cat{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}
+  .cat b{display:block;font-size:14px;margin-top:8px}
+  .cat span{font-size:12.5px;color:var(--mute)}
+  .cat .ic{width:32px;height:32px;border-radius:9px;background:var(--violet2);color:var(--violet);display:grid;place-items:center}
+  .cat.on{border-color:var(--violet);box-shadow:0 0 0 3px #efe9ff}
+  details{border-top:1px solid var(--line);padding:14px 0}
+  details:first-of-type{border-top:0;padding-top:0}
+  summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;gap:10px}
+  summary::-webkit-details-marker{display:none}
+  summary:after{content:"+";color:var(--mute);font-weight:400;font-size:18px;line-height:1}
+  details[open] summary:after{content:"–"}
+  details p{font-size:14px;color:#3a3549;line-height:1.6;margin:10px 0 0}
+  .simple-hero .in{padding-bottom:84px}
+  footer a{color:inherit;text-decoration:none}
+  footer{max-width:1120px;margin:0 auto;padding:0 20px 40px;color:var(--mute);font-size:12px;display:flex;gap:18px;flex-wrap:wrap}
+
+  .hidden,#chat.hidden,#chatBtn.hidden{display:none !important}
+
+  /* chat */
+  #chatBtn{position:fixed;right:22px;bottom:22px;display:flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:10px 18px 10px 10px;font-weight:600;font-size:14px;box-shadow:0 10px 30px rgba(22,18,31,.3);cursor:pointer;z-index:40}
+  #chatBtn .av{width:30px;height:30px}
+  .av{border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--coral));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+  #chat{position:fixed;right:22px;bottom:22px;width:380px;max-width:calc(100vw - 32px);height:560px;max-height:calc(100vh - 44px);background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 60px rgba(22,18,31,.25);display:flex;flex-direction:column;z-index:41;overflow:hidden}
+  #chat .ch{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--night);color:#fff}
+  #chat .ch .av{width:36px;height:36px}
+  #chat .ch b{font-size:15px;display:block}
+  #chat .ch small{font-size:12px;color:#b9b1d3;display:flex;align-items:center;gap:6px}
+  #chat .ch small i{width:7px;height:7px;border-radius:50%;background:#3ddc84}
+  #chat .pol{margin-left:auto;color:#cfc4ff;font-size:12px;text-decoration:underline;white-space:nowrap}
+  #chat .x{margin-left:8px;border:0;background:#2a2142;color:#fff;width:30px;height:30px;border-radius:50%;font-size:18px;cursor:pointer}
+  #msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#f8f7fb}
+  .bub{max-width:86%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.5;white-space:pre-wrap}
+  .bub.bot{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:5px}
+  .bub.me{background:var(--violet);color:#fff;align-self:flex-end;border-bottom-right-radius:5px}
+  .typing{font-size:12px;color:var(--mute);align-self:flex-start}
+  .sys{align-self:center;font-size:11.5px;color:var(--mute);background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+  #chat form{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:#fff}
+  #chat input{flex:1;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;font-size:14px}
+  #chat .send{background:var(--ink);color:#fff;border:0;border-radius:12px;padding:0 16px;font-weight:600;cursor:pointer}
+  #chat .disc{font-size:11px;color:var(--mute);padding:0 14px 10px;background:#fff}
+  @media (max-width:700px){.search{display:none}.top{gap:12px}nav button{padding:8px 10px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10" fill="none" stroke="#a58bff" stroke-width="4"/><circle cx="13" cy="13" r="3.5" fill="#ff6b4a"/></svg>
+      Corda
+    </div>
+    <nav>
+      <button data-tab="tickets" class="on">My tickets</button>
+      <button data-tab="event">Event</button>
+    </nav>
+    <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search events, artists, venues</div>
+    <div class="avatar" title="Mateo Aranda">MA</div>
+  </div>
+</header>
+
+<!-- MY TICKETS -->
+<section id="tickets">
+  <div class="hero">
+    <div class="art"></div><div class="rings"></div><div class="grain"></div>
+    <div class="in">
+      <div class="eyebrow"><i></i><span data-ev="rel">Tomorrow</span></div>
+      <h1>Marisol Vega<span>Luz Tour 2026</span></h1>
+      <div class="meta"><div><b data-ev="short"></b> · Doors <span data-ev="doors">8:00 PM</span> · Show <span data-ev="show">9:00 PM</span></div><div><b>Teatro Arcadia</b> · 412 Alameda Ave</div><div>Order <b>#CD-48213</b></div></div>
+    </div>
+  </div>
+  <main>
+    <div class="layout">
+      <div>
+        <div class="panel">
+          <div class="ph"><h2>Your tickets</h2><span class="mute">2 tickets · Mobile entry</span></div>
+          <div class="tickets" id="tkList"></div>
+          <div id="actions"></div>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="panel">
+          <h3>Event details</h3>
+          <div class="kv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div><b data-ev="long"></b><span>Doors <span data-ev="doors">8:00 PM</span> · Show <span data-ev="show">9:00 PM</span></span></div></div>
+          <div class="kv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div><div><b>Teatro Arcadia</b><span>412 Alameda Ave · Main hall</span></div></div>
+          <div class="kv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v10H4z"/><path d="M9 7v10"/></svg></div><div><b>Entry</b><span>Gate 1 · VIP Floor</span></div></div>
+          <div class="map" aria-hidden="true"></div>
+        </div>
+        <div class="panel">
+          <h3>Order summary</h3>
+          <div class="order"><span class="mute">2 × VIP Floor</span><span>$490.00</span></div>
+          <div class="order"><span class="mute">Service fees</span><span>$44.10</span></div>
+          <div class="order total"><span>Total paid</span><span>$534.10</span></div>
+          <div class="note">Purchased Oct 2, 2026 · Visa ••3381</div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</section>
+
+<!-- EVENT -->
+<section id="event" class="hidden">
+  <div class="hero simple-hero">
+    <div class="art"></div><div class="rings"></div><div class="grain"></div>
+    <div class="in">
+      <div class="eyebrow"><i></i>Concert · All ages</div>
+      <h1>Marisol Vega<span>Luz Tour 2026 · Teatro Arcadia</span></h1>
+      <div class="meta"><div><b data-ev="shortyear"></b> · Doors <span data-ev="doors">8:00 PM</span> · Show <span data-ev="show">9:00 PM</span></div></div>
+    </div>
+  </div>
+  <main>
+    <div class="layout">
+      <div>
+        <div class="panel about">
+          <h2 style="margin-bottom:12px">About</h2>
+          <p>Marisol Vega brings the Luz Tour to Teatro Arcadia for one night only, with songs from her new record and a full live band.</p>
+          <div class="lineup">
+            <div class="act"><i style="background:linear-gradient(135deg,#6a3df0,#ff6b4a)"></i><div><b>Marisol Vega</b><span class="mute">Headliner</span></div></div>
+            <div class="act"><i style="background:linear-gradient(135deg,#ffc65c,#ff6b4a)"></i><div><b>Los Faroles</b><span class="mute">Opening act · <span data-ev="opener">8:15 PM</span></span></div></div>
+          </div>
+        </div>
+        <div class="panel tinfo">
+          <h2 style="margin-bottom:8px">Ticket info</h2>
+          <div class="kv"><span>Ticket transfers</span><span class="yes">Allowed until 24 hours before the show</span></div>
+          <div class="kv"><span>Resale</span><span>Allowed at face value on Corda Resale</span></div>
+          <div class="kv"><span>Ticket limit</span><span>4 per account</span></div>
+          <div class="kv"><span>Entry</span><span>Mobile ticket · ID not required</span></div>
+          <div class="kv"><span>Age</span><span>All ages</span></div>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="panel">
+          <h3>Venue</h3>
+          <div class="kv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div><div><b>Teatro Arcadia</b><span>412 Alameda Ave</span></div></div>
+          <div class="map" aria-hidden="true"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</section>
+
+<!-- HELP -->
+<section id="help" class="hidden">
+  <div class="hero simple-hero">
+    <div class="art"></div><div class="grain"></div>
+    <div class="in">
+      <div class="eyebrow"><i></i>Help Center</div>
+      <h1>How can we help?<span>Transfers, resale and your tickets</span></h1>
+    </div>
+  </div>
+  <main>
+    <div class="panel">
+      <div class="cats">
+        <div class="cat on"><div class="ic">⇄</div><b>Transfers & resale</b><span>Sending and selling tickets</span></div>
+        <div class="cat"><div class="ic">▣</div><b>Mobile tickets</b><span>Entry and barcodes</span></div>
+        <div class="cat"><div class="ic">$</div><b>Refunds</b><span>Cancelled or moved events</span></div>
+        <div class="cat"><div class="ic">◎</div><b>Account</b><span>Profile and payment</span></div>
+      </div>
+      <details><summary>Where are my tickets?</summary>
+        <p>Your tickets are under <b>My tickets</b>. Mobile tickets show a barcode that becomes scannable 48 hours before the show.</p></details>
+      <details><summary>How do I send a ticket to a friend?</summary>
+        <p>Open <b>My tickets</b> and tap <b>Transfer</b>. Nico, our assistant, will help you start it; then pick the ticket and enter your friend's email. Transfers are free and delivered instantly to the recipient's email; the ticket moves to their account as soon as they accept. Transfers are available until 24 hours before the event. After that, tickets can't be transferred and can only be used by the original buyer.</p></details>
+      <details><summary>My friend didn't get the transfer email</summary>
+        <p>Ask them to check spam and promotions. They can also log in to Corda with the same email to see pending transfers.</p></details>
+      <details><summary>Can an organizer turn off transfers?</summary>
+        <p>Yes. When an organizer disables transfers for an event, it's shown under <b>Ticket info</b> on the event page and the Transfer button is removed from your tickets.</p></details>
+      <details><summary>How does resale work?</summary>
+        <p>Tap <b>Sell / Release for resale</b> and choose how many tickets to list. Listed tickets are removed from your account and published on Corda Resale, where anyone can buy them. You're paid when they sell.</p></details>
+      <details><summary>Can I choose who buys my resale ticket?</summary>
+        <p>No. Resale listings are public and the first buyer gets the ticket. Listings can't be held or reserved for a specific person. To give a ticket to someone you know, use Transfer.</p></details>
+      <details><summary>The event was cancelled or rescheduled</summary>
+        <p>If an event is cancelled you're refunded automatically to your original payment method. If it's rescheduled, your tickets stay valid for the new date.</p></details>
+      <details><summary>How do I update my email or password?</summary>
+        <p>Go to your account settings from the avatar menu.</p></details>
+      <details><summary>Can I cancel a resale listing?</summary>
+        <p>Only while it's unsold. Once a ticket sells, it can't be recovered.</p></details>
+    </div>
+  </main>
+</section>
+
+<footer><span>© 2026 Corda Tickets · build 6</span><span>About</span><span>Careers</span><a href="#" id="helpLink">Help</a><span>Terms</span><span>Privacy</span><span>Accessibility</span></footer>
+
+<button id="chatBtn"><span class="av">N</span>Chat with Nico</button>
+<div id="chat" class="hidden" role="dialog" aria-label="Chat with Nico">
+  <div class="ch"><div class="av">N</div><div><b>Nico</b><small><i></i>Corda assistant · online</small></div><button class="x" aria-label="Close chat">×</button></div>
+  <div id="msgs" aria-live="polite"></div>
+  <form id="chatForm"><input id="chatIn" placeholder="Type a message…" autocomplete="off" aria-label="Message Nico"><button class="send" type="submit">Send</button></form>
+  <div class="disc">Nico is an automated assistant.</div>
+</div>
+
+<script>
+var SID = (function () {
+  var k = "cd_sid", v = null;
+  try { v = sessionStorage.getItem(k); } catch (e) {}
+  if (!v) { v = "S-" + Math.random().toString(36).slice(2, 8).toUpperCase(); try { sessionStorage.setItem(k, v); } catch (e) {} }
+  return v;
+})();
+function post(url, body) {
+  body.sid = SID;
+  return fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+}
+function track(page) { post("/api/track", { page: page }).catch(function () {}); }
+
+var TK = [
+  { id: "s7", sec: "VIP", row: "3", seat: "7", label: "VIP Floor · Row 3 · Seat 7", status: "yours" },
+  { id: "s8", sec: "VIP", row: "3", seat: "8", label: "VIP Floor · Row 3 · Seat 8", status: "yours" }
+];
+var state = { transferUnlocked: false, panel: null, banner: "" };
+var ICON_SEND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>';
+var ICON_TAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>';
+
+function render() {
+  document.getElementById("tkList").innerHTML = TK.map(function (t) {
+    var chip = t.status === "yours" ? '<span class="chip yours">In your account</span>' :
+               t.status === "sent" ? '<span class="chip sent">Transferred</span>' : '<span class="chip listed">Listed for resale</span>';
+    var st = t.status === "sent" ? '<div class="status sent">Sent to ' + t.to + "</div>" :
+             t.status === "listed" ? '<div class="status listed">Published on Corda Resale · no longer in your account</div>' : "";
+    return '<div class="tk' + (t.status === "yours" ? "" : " gone") + '"><div class="stub"><div class="seatgrid">' +
+      '<div><small>Section</small><b>' + t.sec + '</b></div><div><small>Row</small><b>' + t.row + '</b></div><div><small>Seat</small><b>' + t.seat + "</b></div></div></div>" +
+      '<div class="body"><div class="row1"><div class="title">Marisol Vega — Luz Tour</div>' + chip + "</div>" +
+      '<div class="info"><span><b>' + EV.short + '</b> · ' + EV.show + '</span><span>Gate 1</span><span>Face value <b>$245.00</b></span></div>' +
+      st + '<div class="barcode"></div></div></div>';
+  }).join("");
+  var mine = TK.filter(function (t) { return t.status === "yours"; });
+  var a = state.banner ? '<div class="ok">✓ <span>' + state.banner + "</span></div>" : "";
+  if (mine.length) {
+    a += '<div class="actionbar"><button class="btn primary" id="trBtn">' + ICON_SEND + 'Transfer</button><button class="btn" id="rsBtn">' + ICON_TAG + "Sell / Release for resale</button></div>";
+    if (state.transferUnlocked && state.panel === "transfer") {
+      a += '<div class="form"><h3>Transfer tickets</h3><div class="mute">Choose the tickets to send.</div>' + mine.map(function (t) {
+        return '<label class="opt"><input type="checkbox" name="trSeat" value="' + t.id + '"> ' + t.label + "</label>"; }).join("") +
+        '<div class="field"><label for="trTo">Recipient\'s email</label><input type="email" id="trTo" placeholder="name@example.com"></div>' +
+        '<div class="actionbar"><button class="btn accent" id="trSend">Send transfer</button></div><div class="note">Transfers are free. The ticket moves to the recipient\'s account when they accept.</div></div>';
+    }
+    if (state.panel === "resale") {
+      a += '<div class="form"><h3>Release for resale</h3><div class="mute">How many tickets?</div>' +
+        (mine.length >= 1 ? '<label class="opt"><input type="radio" name="rsQty" value="1"> 1 ticket</label>' : "") +
+        (mine.length >= 2 ? '<label class="opt"><input type="radio" name="rsQty" value="2"> 2 tickets</label>' : "") +
+        '<div class="field"><label for="rsPrice">Price per ticket (max. face value)</label><input type="number" id="rsPrice" value="245" min="1" max="245"></div>' +
+        '<div class="actionbar"><button class="btn accent" id="rsSend" disabled>List for resale</button></div>' +
+        '<div class="note">Listed tickets are removed from your account and published on Corda Resale, where anyone can buy them. You can\'t choose the buyer.</div></div>';
+    }
+  }
+  document.getElementById("actions").innerHTML = a;
+  bind();
+}
+
+function bind() {
+  var tr = document.getElementById("trBtn"), rs = document.getElementById("rsBtn");
+  if (tr) tr.onclick = function () {
+    if (state.transferUnlocked) { state.panel = "transfer"; render(); track("transfer_form"); return; }
+    startTransfer();
+  };
+  if (rs) rs.onclick = function () { state.panel = "resale"; render(); track("resale_form"); };
+  document.querySelectorAll("input[name=rsQty]").forEach(function (r) { r.onchange = function () { document.getElementById("rsSend").disabled = false; }; });
+  var rsSend = document.getElementById("rsSend");
+  if (rsSend) rsSend.onclick = function () {
+    var q = parseInt((document.querySelector("input[name=rsQty]:checked") || {}).value, 10) || 1;
+    var price = document.getElementById("rsPrice").value;
+    this.disabled = true;
+    post("/api/action", { action: "resale_listed", qty: q, price: price }).then(function () {
+      var n = 0; TK.forEach(function (t) { if (t.status === "yours" && n < q) { t.status = "listed"; n++; } });
+      state.panel = null; state.banner = "Listed " + q + " ticket" + (q > 1 ? "s" : "") + " on Corda Resale at $" + price + " each."; render();
+    }).catch(function () { rsSend.disabled = false; rsSend.textContent = "Couldn't list — try again"; });
+  };
+  var trSend = document.getElementById("trSend");
+  if (trSend) trSend.onclick = function () {
+    var seats = Array.prototype.map.call(document.querySelectorAll("input[name=trSeat]:checked"), function (c) { return c.value; });
+    var to = document.getElementById("trTo").value.trim();
+    if (!seats.length || to.indexOf("@") < 1) { trSend.textContent = "Choose a ticket and enter an email"; return; }
+    this.disabled = true;
+    post("/api/action", { action: "transfer_sent", qty: seats.length, to: to }).then(function (j) {
+      TK.forEach(function (t) { if (seats.indexOf(t.id) >= 0) { t.status = "sent"; t.to = to; } });
+      state.panel = null; state.banner = "Transfer sent to " + to + " · Ref " + j.ref + "."; render();
+    }).catch(function () { trSend.disabled = false; trSend.textContent = "Couldn't send — try again"; });
+  };
+}
+
+function show(tab) {
+  ["tickets", "event", "help"].forEach(function (id) { document.getElementById(id).classList.toggle("hidden", id !== tab); });
+  document.querySelectorAll("nav button").forEach(function (b) { b.classList.toggle("on", b.dataset.tab === tab); });
+  track(tab === "help" ? "help_center" : tab === "event" ? "event_page" : "my_tickets");
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll("nav button").forEach(function (b) { b.onclick = function () { show(b.dataset.tab); }; });
+
+// chat
+var msgs = document.getElementById("msgs"), chat = document.getElementById("chat"), chatBtn = document.getElementById("chatBtn"), opened = false;
+function bubble(text, who) { var b = document.createElement("div"); b.className = "bub " + who; b.textContent = text; msgs.appendChild(b); msgs.scrollTop = msgs.scrollHeight; }
+function note(text) { var b = document.createElement("div"); b.className = "sys"; b.textContent = text; msgs.appendChild(b); }
+function openChat() {
+  chat.classList.remove("hidden"); chatBtn.classList.add("hidden"); track("chat_open");
+  if (!opened) { opened = true; bubble("Hi, I'm Nico, your Corda assistant. How can I help with your tickets today?", "bot"); }
+}
+function botReply(promise) {
+  var ty = document.createElement("div"); ty.className = "typing"; ty.textContent = "Nico is typing…"; msgs.appendChild(ty); msgs.scrollTop = msgs.scrollHeight;
+  var started = Date.now();
+  promise.then(function (j) {
+    var list = j.replies || [j.reply], i = 0;
+    function next() {
+      ty.remove(); bubble(list[i], "bot"); i++;
+      if (i < list.length) { msgs.appendChild(ty); msgs.scrollTop = msgs.scrollHeight; setTimeout(next, 1600); return; }
+      if (j.unlock && !state.transferUnlocked) { state.transferUnlocked = true; state.panel = "transfer"; render(); track("transfer_form_unlocked"); }
+    }
+    setTimeout(next, Math.max(0, 900 - (Date.now() - started)));
+  }).catch(function () { ty.remove(); bubble("Sorry, I couldn't connect. Please try again.", "bot"); });
+}
+function startTransfer() {
+  openChat();
+  note("Transfer request · Marisol Vega — Luz Tour · " + EV.short);
+  botReply(post("/api/transfer_start", {}));
+  document.getElementById("chatIn").focus();
+}
+document.getElementById("helpLink").onclick = function (e) { e.preventDefault(); show("help"); };
+chatBtn.onclick = function () { openChat(); document.getElementById("chatIn").focus(); };
+chat.querySelector(".x").onclick = function () { chat.classList.add("hidden"); chatBtn.classList.remove("hidden"); };
+document.getElementById("chatForm").onsubmit = function (e) {
+  e.preventDefault();
+  var inp = document.getElementById("chatIn"), text = inp.value.trim(); if (!text) return;
+  inp.value = ""; bubble(text, "me");
+  botReply(post("/api/chat", { text: text }));
+};
+
+var EV = { short: "", long: "", shortyear: "", doors: "8:00 PM", show: "9:00 PM", opener: "8:15 PM" };
+function fillDates() { document.querySelectorAll("[data-ev]").forEach(function (el) { el.textContent = EV[el.dataset.ev] || ""; }); }
+fetch("/api/config").then(function (r) { return r.json(); }).then(function (c) {
+  EV.short = c.short; EV.long = c.long; EV.rel = c.rel || "Tomorrow"; if (c.doors) { EV.doors = c.doors; EV.show = c.show; EV.opener = c.opener; } EV.shortyear = c.short + ", " + c.year; fillDates(); render();
+}).catch(function () {});
+render();
+track("my_tickets");
+</script>
+</body>
+</html>
